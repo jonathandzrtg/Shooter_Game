@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using UnityEngine;
+using UnityEditor;
+using Mirror;
+using UnityEngine.UI;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     public bool Player = true;
     public bool Active = true;
@@ -52,20 +55,23 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        playerTr = this.transform;
-        playerRb = GetComponent<Rigidbody>();
-        playerAnim = GetComponentInChildren<Animator>();
-        playerRagdoll = GetComponentInChildren<RagdollController>();
+        if (isLocalPlayer) {
+            playerTr = this.transform;
+            playerRb = GetComponent<Rigidbody>();
+            playerAnim = GetComponentInChildren<Animator>();
+            playerRagdoll = GetComponentInChildren<RagdollController>();
 
-        theCamera = Camera.main.transform;
+            theCamera = Camera.main.transform;
 
-        // Configurar el componente AudioSource
-        audioSource = gameObject.AddComponent<AudioSource>();
+            // Configurar el componente AudioSource
+            audioSource = gameObject.AddComponent<AudioSource>();
 
-        Cursor.lockState = CursorLockMode.Locked;
+            Cursor.lockState = CursorLockMode.Locked;
 
-        currentHealth = maxHealth;
-        Active = true;
+            currentHealth = maxHealth;
+            Active = true;
+        }
+
     }
 
     // Update is called once per frame
@@ -93,30 +99,66 @@ public class PlayerController : MonoBehaviour
 
     public void MoveLogic()
     {
-        float moveX = Input.GetAxis("Horizontal");
-        float moveZ = Input.GetAxis("Vertical");
-        float theTime = Time.deltaTime;
-
-        newDirection = new Vector2(moveX, moveZ);
-
-        Vector3 side = playerSpeed * moveX * theTime * playerTr.right;
-        Vector3 forward = playerSpeed * moveZ * theTime * playerTr.forward;
-
-        Vector3 endDirection = side + forward;
-
-        playerRb.velocity = endDirection;
-
-        // Control de sonido de pasos
-        if (newDirection.magnitude > 0 && IsGrounded() && Time.time > stepTimer)
+        if (!playerRb.isKinematic)
         {
-            // Reproducir sonido de paso aleatorio
-            AudioClip stepSound = stepSounds[Random.Range(0, stepSounds.Length)];
-            audioSource.PlayOneShot(stepSound);
+            float moveX = Input.GetAxis("Horizontal");
+            float moveZ = Input.GetAxis("Vertical");
+            float theTime = Time.deltaTime;
 
-            // Reiniciar el temporizador de pasos
-            stepTimer = Time.time + stepInterval;
+            newDirection = new Vector2(moveX, moveZ);
+
+            Vector3 side = playerSpeed * moveX * theTime * playerTr.right;
+            Vector3 forward = playerSpeed * moveZ * theTime * playerTr.forward;
+
+            Vector3 endDirection = side + forward;
+
+            playerRb.velocity = endDirection;
+
+            // Control de sonido de pasos
+            if (newDirection.magnitude > 0 && IsGrounded() && Time.time > stepTimer)
+            {
+                // Reproducir sonido de paso aleatorio
+                AudioClip stepSound = stepSounds[Random.Range(0, stepSounds.Length)];
+                audioSource.PlayOneShot(stepSound);
+
+                // Reiniciar el temporizador de pasos
+                stepTimer = Time.time + stepInterval;
+            }
+        }
+        else
+        {
+            // Aquí puedes agregar lógica para mover el personaje cuando está muerto
+            // Por ejemplo, puedes hacer que el personaje caiga hacia abajo o se mueva en una dirección específica.
+            // playerRb.velocity = new Vector3(0, -1, 0); // Ejemplo: hacer que el personaje caiga hacia abajo
         }
     }
+
+    //public void MoveLogic()
+    //{
+    //    float moveX = Input.GetAxis("Horizontal");
+    //    float moveZ = Input.GetAxis("Vertical");
+    //    float theTime = Time.deltaTime;
+
+    //    newDirection = new Vector2(moveX, moveZ);
+
+    //    Vector3 side = playerSpeed * moveX * theTime * playerTr.right;
+    //    Vector3 forward = playerSpeed * moveZ * theTime * playerTr.forward;
+
+    //    Vector3 endDirection = side + forward;
+
+    //    playerRb.velocity = endDirection;
+
+    //    // Control de sonido de pasos
+    //    if (newDirection.magnitude > 0 && IsGrounded() && Time.time > stepTimer)
+    //    {
+    //        // Reproducir sonido de paso aleatorio
+    //        AudioClip stepSound = stepSounds[Random.Range(0, stepSounds.Length)];
+    //        audioSource.PlayOneShot(stepSound);
+
+    //        // Reiniciar el temporizador de pasos
+    //        stepTimer = Time.time + stepInterval;
+    //    }
+    //}
 
     public void CameraLogic()
     {

@@ -1,8 +1,9 @@
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BulletController : MonoBehaviour
+public class BulletController : NetworkBehaviour
 {
     Transform bulletTr;
     Rigidbody bulletRb;
@@ -34,7 +35,10 @@ public class BulletController : MonoBehaviour
     {
         time += Time.deltaTime;
 
-        DetectCollision();
+        if (!isLocalPlayer) {
+            DetectCollision();
+        }
+        
 
         if (time >= lifeTime) 
         {
@@ -42,6 +46,7 @@ public class BulletController : MonoBehaviour
         }
     }
 
+    //[ServerCallback]
     public void DetectCollision()
     {
         Vector3 bulletNewPos = bulletTr.position;

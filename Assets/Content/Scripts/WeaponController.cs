@@ -1,8 +1,9 @@
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WeaponController : MonoBehaviour
+public class WeaponController : NetworkBehaviour
 {
     public Transform shootSpawn;
 
@@ -40,11 +41,14 @@ public class WeaponController : MonoBehaviour
             }
         }
     }
-
+    //[Command]
     public void Shoot()
     {
-        // Instanciar la bala
         Instantiate(bulletPrefab, shootSpawn.position, shootSpawn.rotation);
+        // Instanciar la bala
+        //GameObject proyectil = Instantiate(bulletPrefab, shootSpawn.position, shootSpawn.rotation);
+
+        //NetworkServer.Spawn(proyectil);
 
         // Reproducir el sonido de disparo
         if (audioSource != null && shootSound != null)

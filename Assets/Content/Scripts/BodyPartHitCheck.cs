@@ -1,8 +1,9 @@
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BodyPartHitCheck : MonoBehaviour
+public class BodyPartHitCheck : NetworkBehaviour
 {
     [HideInInspector]
     public PlayerController PLAYER;
